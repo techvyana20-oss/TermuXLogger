@@ -2,7 +2,7 @@
 
 # ==================================================
 # TERMUX COMMAND LOGGER & VIEWER
-# Author : TechVyana
+# Author : TechVyana2.0
 # Purpose: Educational & Productivity
 # ==================================================
 
