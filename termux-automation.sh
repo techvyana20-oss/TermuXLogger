@@ -2,7 +2,7 @@
 
 # ==================================================
 # TERMUX AUTOMATION LOGGER (STABLE & WORKING)
-# Author : TechVyana
+# Author : TechVyana2.0
 # Purpose: Educational & Productivity
 # ==================================================
 
