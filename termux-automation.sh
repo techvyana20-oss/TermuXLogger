@@ -1,8 +1,8 @@
 #!/data/data/com.termux/files/usr/bin/bash
 
 # ==================================================
-# ULTIMATE TERMUX AUTOMATION LOGGER (ALL-IN-ONE)
-# Author : TechVyana2.0
+# ULTIMATE TERMUX AUTOMATION LOGGER (STABLE)
+# Author : TechVyana
 # Purpose: Educational & Productivity
 # ==================================================
 
@@ -31,27 +31,32 @@ echo "    ██║   █████╗  ██████╔╝██╔█�
 echo "    ██║   ██╔══╝  ██╔══██╗██║╚██╔╝██║██║   ██║ ██╔██╗ "
 echo "    ██║   ███████╗██║  ██║██║ ╚═╝ ██║╚██████╔╝██╔╝ ██╗"
 echo "    ╚═╝   ╚══════╝╚═╝  ╚═╝╚═╝     ╚═╝ ╚═════╝ ╚═╝  ╚═╝"
-echo -e "${CYAN} Command Logger • Audit • Productivity${RESET}"
+echo -e "${CYAN} Automation • Logs • Productivity${RESET}"
 echo
 }
 
-# ---------- INSTALL BACKGROUND LOGGER (ONCE) ----------
-if ! grep -q "TERMUX COMMAND LOGGER (TechVyana)" "$BASHRC" 2>/dev/null; then
+# ---------- INSTALL LOGGER (ONCE) ----------
+if ! grep -q "TECHVYANA_CMD_LOGGER" "$BASHRC" 2>/dev/null; then
   banner
   echo -e "${YELLOW}Installing background command logger...${RESET}"
 
-  cat <<'EOF' >> "$BASHRC"
+cat <<'EOF' >> "$BASHRC"
 
-# ===== TERMUX COMMAND LOGGER (TechVyana) =====
-shopt -s histappend
-export HISTTIMEFORMAT="%F %T "
-PROMPT_COMMAND='CMD=$(history 1 | sed "s/^[ ]*[0-9]\+[ ]*//"); echo "[$(date "+%Y-%m-%d %H:%M:%S")] $CMD" >> $HOME/.tlogs/cmd.log'
-# ============================================
+# ==== TECHVYANA_CMD_LOGGER ====
+log_cmd() {
+  cmd=$(history 1 | sed 's/^[ ]*[0-9]\+[ ]*//')
+  case "$cmd" in
+    *termux-automation.sh*) return ;;
+    *) echo "[$(date '+%Y-%m-%d %H:%M:%S')] $cmd" >> $HOME/.tlogs/cmd.log ;;
+  esac
+}
+PROMPT_COMMAND=log_cmd
+# =============================
 
 EOF
 
   echo -e "${GREEN}Logger installed successfully!${RESET}"
-  echo -e "${CYAN}Restart Termux to start command logging.${RESET}"
+  echo -e "${CYAN}Restart Termux once.${RESET}"
   sleep 3
 fi
 
@@ -62,7 +67,7 @@ if [ ! -f "$PASS_FILE" ]; then
   read -s PASS
   echo
   echo -n "$PASS" | sha256sum | awk '{print $1}' > "$PASS_FILE"
-  echo -e "${GREEN}Password set successfully!${RESET}"
+  echo -e "${GREEN}Password saved.${RESET}"
   sleep 2
 fi
 
@@ -82,10 +87,10 @@ fi
 # ---------- MENU ----------
 while true; do
 banner
-echo -e "${CYAN}1️⃣ View All Command Logs"
-echo "2️⃣ Today's Command Summary"
-echo "3️⃣ Clear Logs (Protected)"
-echo "4️⃣ Exit${RESET}"
+echo -e "${CYAN}1) View Logs"
+echo "2) Daily Summary"
+echo "3) Clear Logs (Protected)"
+echo "4) Exit${RESET}"
 echo
 read -p "Choose: " CHOICE
 
@@ -96,18 +101,18 @@ case $CHOICE in
 2)
   echo -e "${GREEN}Today's Commands:${RESET}"
   grep "$(date '+%Y-%m-%d')" "$LOG_FILE" || echo "No logs today."
-  read -p "Press ENTER to continue..."
+  read -p "Press ENTER..."
   ;;
 3)
-  echo -e "${RED}Confirm Admin Password:${RESET}"
+  echo -e "${RED}Confirm Password:${RESET}"
   read -s CPASS
   echo
   C_HASH=$(echo -n "$CPASS" | sha256sum | awk '{print $1}')
   if [ "$C_HASH" == "$REAL" ]; then
     > "$LOG_FILE"
-    echo -e "${GREEN}Logs cleared securely.${RESET}"
+    echo -e "${GREEN}Logs cleared.${RESET}"
   else
-    echo -e "${RED}Wrong password!${RESET}"
+    echo -e "${RED}Wrong password.${RESET}"
   fi
   sleep 2
   ;;
