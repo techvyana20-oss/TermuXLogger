@@ -1,15 +1,15 @@
 #!/data/data/com.termux/files/usr/bin/bash
 
-# ===============================
-# TERMUX AUTOMATION LOGGER TOOL
-# Author: TechVyana
-# Purpose: Productivity & Learning
-# ===============================
+# ==================================================
+# ULTIMATE TERMUX AUTOMATION LOGGER (ALL-IN-ONE)
+# Author : TechVyana2.0
+# Purpose: Educational & Productivity
+# ==================================================
 
 LOG_DIR="$HOME/.tlogs"
-LOG_FILE="$LOG_DIR/activity.log"
+LOG_FILE="$LOG_DIR/cmd.log"
 PASS_FILE="$LOG_DIR/.pass"
-DATE_NOW=$(date "+%Y-%m-%d %H:%M:%S")
+BASHRC="$HOME/.bashrc"
 
 mkdir -p "$LOG_DIR"
 touch "$LOG_FILE"
@@ -31,20 +31,41 @@ echo "    ██║   █████╗  ██████╔╝██╔█�
 echo "    ██║   ██╔══╝  ██╔══██╗██║╚██╔╝██║██║   ██║ ██╔██╗ "
 echo "    ██║   ███████╗██║  ██║██║ ╚═╝ ██║╚██████╔╝██╔╝ ██╗"
 echo "    ╚═╝   ╚══════╝╚═╝  ╚═╝╚═╝     ╚═╝ ╚═════╝ ╚═╝  ╚═╝"
-echo -e "${CYAN}        Automation • Logs • Productivity${RESET}"
+echo -e "${CYAN}   Automation • Command Logs • Audit${RESET}"
 echo
 }
 
+# ---------- INSTALL LOGGER (ONCE) ----------
+if ! grep -q "TERMUX COMMAND LOGGER (TechVyana)" "$BASHRC" 2>/dev/null; then
+  echo -e "${YELLOW}Installing background command logger...${RESET}"
+  cat <<'EOF' >> "$BASHRC"
+
+# ===== TERMUX COMMAND LOGGER (TechVyana) =====
+export HISTTIMEFORMAT="%F %T "
+PROMPT_COMMAND='
+CMD=$(history 1 | sed "s/^[ ]*[0-9]\+[ ]*//");
+echo "[$(date "+%Y-%m-%d %H:%M:%S")] $CMD" >> $HOME/.tlogs/cmd.log
+'
+# ============================================
+
+EOF
+  echo -e "${GREEN}Logger installed. Restart Termux after exit.${RESET}"
+  sleep 2
+fi
+
 # ---------- PASSWORD SETUP ----------
 if [ ! -f "$PASS_FILE" ]; then
+  banner
   echo -e "${YELLOW}Set Admin Password:${RESET}"
   read -s PASS
   echo
   echo -n "$PASS" | sha256sum | awk '{print $1}' > "$PASS_FILE"
   echo -e "${GREEN}Password set successfully!${RESET}"
+  sleep 1
 fi
 
 # ---------- AUTH ----------
+banner
 echo -e "${CYAN}Enter Password:${RESET}"
 read -s INPUT
 echo
@@ -56,14 +77,11 @@ if [ "$HASH" != "$REAL" ]; then
   exit 1
 fi
 
-# ---------- LOGGING ----------
-echo "[$DATE_NOW] Tool accessed" >> "$LOG_FILE"
-
 # ---------- MENU ----------
 while true; do
 banner
-echo -e "${CYAN}1️⃣ View Logs"
-echo "2️⃣ Daily Summary"
+echo -e "${CYAN}1️⃣ View All Command Logs"
+echo "2️⃣ Today's Command Summary"
 echo "3️⃣ Clear Logs (Protected)"
 echo "4️⃣ Exit${RESET}"
 echo
@@ -74,12 +92,12 @@ case $CHOICE in
   less "$LOG_FILE"
   ;;
 2)
-  echo -e "${GREEN}Today's Activity:${RESET}"
-  grep "$(date '+%Y-%m-%d')" "$LOG_FILE"
-  read -p "Press Enter..."
+  echo -e "${GREEN}Today's Commands:${RESET}"
+  grep "$(date '+%Y-%m-%d')" "$LOG_FILE" || echo "No logs today."
+  read -p "Press ENTER to continue..."
   ;;
 3)
-  echo -e "${RED}Confirm Password:${RESET}"
+  echo -e "${RED}Confirm Admin Password:${RESET}"
   read -s CPASS
   echo
   C_HASH=$(echo -n "$CPASS" | sha256sum | awk '{print $1}')
@@ -92,11 +110,10 @@ case $CHOICE in
   sleep 1
   ;;
 4)
-  echo "[$DATE_NOW] Tool exited" >> "$LOG_FILE"
-  exit
+  exit 0
   ;;
 *)
-  echo -e "${RED}Invalid option${RESET}"
+  echo -e "${RED}Invalid option!${RESET}"
   sleep 1
   ;;
 esac
