@@ -30,7 +30,7 @@ This tool helps you **track activity, manage logs, and improve daily workflow** 
 ```bash
 pkg update -y
 pkg install git -y
-git clone https://github.com/yourusername/termux-automation-tool
+git clone https://github.com/techvyana20-oss/TermuXLogger.git
 cd termux-automation-tool
 chmod +x termux-automation.sh
 ./termux-automation.sh
