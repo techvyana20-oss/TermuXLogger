@@ -1,7 +1,7 @@
 #!/data/data/com.termux/files/usr/bin/bash
 
 # ==================================================
-# ULTIMATE TERMUX AUTOMATION LOGGER (STABLE)
+# TERMUX AUTOMATION LOGGER (STABLE & WORKING)
 # Author : TechVyana
 # Purpose: Educational & Productivity
 # ==================================================
@@ -35,29 +35,26 @@ echo -e "${CYAN} Automation • Logs • Productivity${RESET}"
 echo
 }
 
-# ---------- INSTALL LOGGER (ONCE) ----------
-if ! grep -q "TECHVYANA_CMD_LOGGER" "$BASHRC" 2>/dev/null; then
+# ---------- INSTALL BACKGROUND LOGGER ----------
+if ! grep -q "TERMUX_COMMAND_LOGGER_TV" "$BASHRC" 2>/dev/null; then
   banner
   echo -e "${YELLOW}Installing background command logger...${RESET}"
 
 cat <<'EOF' >> "$BASHRC"
 
-# ==== TECHVYANA_CMD_LOGGER ====
-log_cmd() {
-  cmd=$(history 1 | sed 's/^[ ]*[0-9]\+[ ]*//')
-  case "$cmd" in
-    *termux-automation.sh*) return ;;
-    *) echo "[$(date '+%Y-%m-%d %H:%M:%S')] $cmd" >> $HOME/.tlogs/cmd.log ;;
-  esac
-}
-PROMPT_COMMAND=log_cmd
-# =============================
+# ===== TERMUX_COMMAND_LOGGER_TV =====
+shopt -s histappend
+PROMPT_COMMAND='
+LAST_CMD=$(history 1 | sed "s/^[ ]*[0-9]\+[ ]*//");
+[ -n "$LAST_CMD" ] && echo "[$(date "+%Y-%m-%d %H:%M:%S")] $LAST_CMD" >> $HOME/.tlogs/cmd.log
+'
+# ==================================
 
 EOF
 
-  echo -e "${GREEN}Logger installed successfully!${RESET}"
-  echo -e "${CYAN}Restart Termux once.${RESET}"
-  sleep 3
+  echo -e "${GREEN}Logger installed successfully.${RESET}"
+  echo -e "${CYAN}⚠ Restart Termux to start logging commands.${RESET}"
+  exit 0
 fi
 
 # ---------- PASSWORD SETUP ----------
@@ -67,7 +64,7 @@ if [ ! -f "$PASS_FILE" ]; then
   read -s PASS
   echo
   echo -n "$PASS" | sha256sum | awk '{print $1}' > "$PASS_FILE"
-  echo -e "${GREEN}Password saved.${RESET}"
+  echo -e "${GREEN}Password set successfully!${RESET}"
   sleep 2
 fi
 
@@ -87,8 +84,8 @@ fi
 # ---------- MENU ----------
 while true; do
 banner
-echo -e "${CYAN}1) View Logs"
-echo "2) Daily Summary"
+echo -e "${CYAN}1) View All Logs"
+echo "2) Today's Summary"
 echo "3) Clear Logs (Protected)"
 echo "4) Exit${RESET}"
 echo
@@ -99,7 +96,6 @@ case $CHOICE in
   less "$LOG_FILE"
   ;;
 2)
-  echo -e "${GREEN}Today's Commands:${RESET}"
   grep "$(date '+%Y-%m-%d')" "$LOG_FILE" || echo "No logs today."
   read -p "Press ENTER..."
   ;;
@@ -107,12 +103,11 @@ case $CHOICE in
   echo -e "${RED}Confirm Password:${RESET}"
   read -s CPASS
   echo
-  C_HASH=$(echo -n "$CPASS" | sha256sum | awk '{print $1}')
-  if [ "$C_HASH" == "$REAL" ]; then
+  if [ "$(echo -n "$CPASS" | sha256sum | awk '{print $1}')" == "$REAL" ]; then
     > "$LOG_FILE"
     echo -e "${GREEN}Logs cleared.${RESET}"
   else
-    echo -e "${RED}Wrong password.${RESET}"
+    echo -e "${RED}Wrong password!${RESET}"
   fi
   sleep 2
   ;;
@@ -120,7 +115,7 @@ case $CHOICE in
   exit 0
   ;;
 *)
-  echo -e "${RED}Invalid option!${RESET}"
+  echo -e "${RED}Invalid option${RESET}"
   sleep 1
   ;;
 esac
